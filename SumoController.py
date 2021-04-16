@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import evdev
+from time import sleep
 
 leftrearin1 = 19
 leftrearin2 = 13
@@ -86,68 +87,71 @@ def forward(pin1,pin2):
 def backward(pin1,pin2):
     forward(pin2, pin1)
     
+while True:
+    ## Initializing ##
+    print("Finding ps3 controller...")
+    devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
+    ps3dev = None
+    for device in devices:
+        print(device.path, device.name, device.phys)
+        if device.name == 'Sony PLAYSTATION(R)3 Controller':
+            ps3dev = device.fn
+    if ps3dev is None:
+        continue
 
-## Initializing ##
-print("Finding ps3 controller...")
-devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
-for device in devices:
-    print(device.path, device.name, device.phys)
-    if device.name == 'Sony PLAYSTATION(R)3 Controller':
-        ps3dev = device.fn
+    gpio_setup()
+    gamepad = evdev.InputDevice(ps3dev)
 
-gpio_setup()
-gamepad = evdev.InputDevice(ps3dev)
-
-leftrearpwm = pwm_prep(leftrearspeed)
-rightrearpwm = pwm_prep(rightrearspeed)
-leftfrontpwm = pwm_prep(leftfrontspeed)
-rightfrontpwm = pwm_prep(rightfrontspeed)
+    leftrearpwm = pwm_prep(leftrearspeed)
+    rightrearpwm = pwm_prep(rightrearspeed)
+    leftfrontpwm = pwm_prep(leftfrontspeed)
+    rightfrontpwm = pwm_prep(rightfrontspeed)
 
 
 
-for event in gamepad.read_loop():   #this loops infinitely
-    value = scale_stick_to_motor(event.value)
-    if event.type == 3:             #A stick is moved
-        if event.code == 4:         #Y axis on right stick
-            rightspeed = 0
-#            print(f"{value}")
-            if 10 > value > -10:
-                stop(rightfrontin3,rightfrontin4)
-                stop(rightrearin3,rightrearin4)
-            elif value > 1:
-                # go forward
-                forward(rightfrontin3,rightfrontin4)
-                forward(rightrearin3,rightrearin4)
-                rightspeed = abs(value)
-            else:
-                #go backward
-                backward(rightfrontin3,rightfrontin4)
-                backward(rightrearin3,rightrearin4)
-                rightspeed = abs(value)
-#            print(f"right speed {rightspeed}")
-            rightrearpwm.ChangeDutyCycle(rightspeed)
-            rightfrontpwm.ChangeDutyCycle(rightspeed)
-        elif event.code == 1:         #Y axis on left stick
-            leftspeed = 0
- #           print(f"{value}")
-            if 10 > value > -10:
-                stop(leftfrontin1,leftfrontin2)
-                stop(leftrearin1,leftrearin2)
-            elif value > 1:
-                # go forward
-                forward(leftfrontin1,leftfrontin2)
-                forward(leftrearin1,leftrearin2)
-                leftspeed = abs(value)
-            else:
-                #go backward
-                backward(leftfrontin1,leftfrontin2)
-                backward(leftrearin1,leftrearin2)
-                leftspeed = abs(value)
-#            print(f"left speed {leftspeed}")
-            leftrearpwm.ChangeDutyCycle(leftspeed)
-            leftfrontpwm.ChangeDutyCycle(leftspeed)
-    if event.type == 1 and event.code == 291 and event.value == 1:
-        print("Start button is pressed. Stopping.")
-        running = False
-        break
-
+    for event in gamepad.read_loop():   #this loops infinitely
+        value = scale_stick_to_motor(event.value)
+        if event.type == 3:             #A stick is moved
+            if event.code == 4:         #Y axis on right stick
+                rightspeed = 0
+    #            print(f"{value}")
+                if 10 > value > -10:
+                    stop(rightfrontin3,rightfrontin4)
+                    stop(rightrearin3,rightrearin4)
+                elif value > 1:
+                    # go forward
+                    forward(rightfrontin3,rightfrontin4)
+                    forward(rightrearin3,rightrearin4)
+                    rightspeed = abs(value)
+                else:
+                    #go backward
+                    backward(rightfrontin3,rightfrontin4)
+                    backward(rightrearin3,rightrearin4)
+                    rightspeed = abs(value)
+    #            print(f"right speed {rightspeed}")
+                rightrearpwm.ChangeDutyCycle(rightspeed)
+                rightfrontpwm.ChangeDutyCycle(rightspeed)
+            elif event.code == 1:         #Y axis on left stick
+                leftspeed = 0
+     #           print(f"{value}")
+                if 10 > value > -10:
+                    stop(leftfrontin1,leftfrontin2)
+                    stop(leftrearin1,leftrearin2)
+                elif value > 1:
+                    # go forward
+                    forward(leftfrontin1,leftfrontin2)
+                    forward(leftrearin1,leftrearin2)
+                    leftspeed = abs(value)
+                else:
+                    #go backward
+                    backward(leftfrontin1,leftfrontin2)
+                    backward(leftrearin1,leftrearin2)
+                    leftspeed = abs(value)
+    #            print(f"left speed {leftspeed}")
+                leftrearpwm.ChangeDutyCycle(leftspeed)
+                leftfrontpwm.ChangeDutyCycle(leftspeed)
+        # if event.type == 1 and event.code == 291 and event.value == 1:
+        #     print("Start button is pressed. Stopping.")
+        #     running = False
+        #     break
+    sleep(1)
