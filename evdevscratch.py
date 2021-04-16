@@ -12,7 +12,7 @@ print(device)
 for event in device.read_loop():
     if event.type == evdev.ecodes.EV_KEY:
         print(evdev.categorize(event))
-    if event.type == 3:  # A stick is moved
-        if event.code == 4:
-            print(f"{event}")
+    # if event.type == 3:  # A stick is moved
+        # if event.code == 4:
+        #     print(f"{event}")
 # python -m evdev.evtest

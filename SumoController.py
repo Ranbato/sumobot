@@ -96,7 +96,11 @@ while True:
         print(device.path, device.name, device.phys)
         if device.name == 'Sony PLAYSTATION(R)3 Controller':
             ps3dev = device.fn
+            print(ps3dev)
+        else:
+            print("Other device")
     if ps3dev is None:
+        sleep(2)
         continue
 
     gpio_setup()
