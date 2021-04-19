@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import evdev
+import espeak
 
 from time import sleep
 
@@ -90,6 +91,8 @@ def backward(pin1,pin2):
     
 while True:
     ## Initializing ##
+    espeak.init()
+    speaker = espeak.Espeak()
     print("Finding ps3 controller...")
     devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
     ps3dev = None
@@ -155,5 +158,14 @@ while True:
     #            print(f"left speed {leftspeed}")
                 leftrearpwm.ChangeDutyCycle(leftspeed)
                 leftfrontpwm.ChangeDutyCycle(leftspeed)
+        elif event.type == 1 and event.value == 1:
+            say = "Uh Oh"
+            if event.code == 307: say = "Exterminate!"
+            elif event.code == 308: say = "You will be defeated!"
+            elif event.code == 304: say = "Run away!"
 
+            speaker.say(say)
+            print(f"Bbutton is pressed: {event.code}.")
+        #     running = False
+        #     break
     sleep(1)
